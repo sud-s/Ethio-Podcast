@@ -37,3 +37,5 @@ build/
 # Internal documentation (auth & firebase guides)
 backend/AUTH_README.md
 backend/FIREBASE_SETUP_GUIDE.md
+FRONTEND_GUIDE.md
+frontend-developer-docs.md
