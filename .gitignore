@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+backend/venv/
+__pycache__/
+*.pyc
+
+# Firebase & API Keys - KEEP SECRET!
+backend/config/firebase-config.js
+backend/config/serviceAccountKey.json
+*serviceAccount*.json
+*firebase*.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# User data & sensitive info
+users.json
+podcasts_backup.json
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build output
+dist/
+build/
+
+# Internal documentation (auth & firebase guides)
+backend/AUTH_README.md
+backend/FIREBASE_SETUP_GUIDE.md

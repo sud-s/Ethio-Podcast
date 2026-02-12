@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethiopodcasts - Audio Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a2e;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .container {
+            background: linear-gradient(145deg, #16213e, #1a1a2e);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+        h1 {
+            color: #e94560;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+        .album-art {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            position: relative;
+        }
+        .album-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .album-art::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.5) 100%);
+        }
+        .podcast-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .podcast-uploader {
+            color: #888;
+            font-size: 0.95em;
+            margin-bottom: 25px;
+        }
+        .progress-container {
+            margin: 20px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #0f3460;
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        .controls button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .controls button:hover {
+            transform: scale(1.1);
+        }
+        .controls button svg {
+            width: 50px;
+            height: 50px;
+            fill: #fff;
+        }
+        .controls .play-btn svg {
+            width: 65px;
+            height: 65px;
+            fill: #e94560;
+        }
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 3px;
+            height: 40px;
+            margin: 20px 0;
+        }
+        .visualizer .bar {
+            width: 4px;
+            background: linear-gradient(to top, #e94560, #ff6b6b);
+            border-radius: 2px;
+            transition: height 0.1s;
+        }
+        .paused .bar {
+            height: 5px !important;
+        }
+        .input-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #0f3460;
+        }
+        .input-section input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #0f3460;
+            background: #16213e;
+            color: #fff;
+            text-align: center;
+            font-size: 1em;
+        }
+        .input-section input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .input-section button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .input-section button:hover {
+            transform: translateY(-2px);
+        }
+        .hidden-video {
+            position: absolute;
+            left: -9999px;
+        }
+        .status {
+            color: #888;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        .status.playing {
+            color: #4ade80;
+        }
+        
+        /* Auth Section */
+        .auth-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #0f3460;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: #e94560;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .auth-btn:hover {
+            background: #d63d56;
+        }
+        
+        .auth-btn.secondary {
+            background: transparent;
+            border: 1px solid #0f3460;
+        }
+        
+        .user-info {
+            display: none;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        
+        .user-info.active {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+        }
+        
+        .user-info span {
+            flex: 1;
+            text-align: left;
+            font-size: 0.85em;
+        }
+        
+        .user-info button {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            background: #0f3460;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.75em;
+        }
+        
+        /* Watchlist Button */
+        .watchlist-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: #0f3460;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .watchlist-btn:hover {
+            background: #1a4a7a;
+        }
+        
+        .watchlist-btn.saved {
+            background: #e94560;
+        }
+        
+        /* History Section */
+        .history-section {
+            margin-top: 15px;
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+        .history-link {
+            color: #e94560;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎧 Ethiopodcasts</h1>
+        
+        <div class="album-art">
+            <img id="thumbnail" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280' viewBox='0 0 280 280'%3E%3Crect fill='%230f3460' width='280' height='280'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-size='20'%3ELoading...%3C/text%3E%3C/svg%3E" alt="Podcast Cover">
+        </div>
+        
+        <h2 class="podcast-title" id="title">Loading...</h2>
+        <p class="podcast-uploader" id="uploader">-</p>
+        
+        <div class="progress-container">
+            <div class="progress-bar" onclick="seek(event)">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+        
+        <div class="visualizer paused" id="visualizer">
+            <div class="bar" style="height: 15px;"></div>
+            <div class="bar" style="height: 25px;"></div>
+            <div class="bar" style="height: 20px;"></div>
+            <div class="bar" style="height: 35px;"></div>
+            <div class="bar" style="height: 15px;"></div>
+            <div class="bar" style="height: 30px;"></div>
+            <div class="bar" style="height: 20px;"></div>
+            <div class="bar" style="height: 10px;"></div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="rewind()">
+                <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+            </button>
+            <button class="play-btn" onclick="togglePlay()" id="playBtn">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button onclick="openInNewTab()">
+                <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+            </button>
+        </div>
+        
+        <p class="status" id="status">Load a podcast to start</p>
+        
+        <div class="input-section">
+            <input type="text" id="podcastId" placeholder="Enter YouTube Video ID" value="32gjWXaXTzs">
+            <button onclick="loadPodcast()">▶ Load Podcast</button>
+        </div>
+        
+        <!-- Auth Section -->
+        <div class="auth-section">
+            <div id="user-info" class="user-info">
+                <img id="user-photo" src="" alt="User">
+                <span id="user-name">User</span>
+                <button onclick="signOut()">Sign Out</button>
+            </div>
+            
+            <div id="auth-buttons">
+                <button class="auth-btn" onclick="window.location.href='auth.html'">🔐 Sign In / Create Account</button>
+            </div>
+            
+            <div id="watchlist-section" style="display:none;">
+                <button id="watchlist-btn" class="watchlist-btn" onclick="toggleWatchlist()">
+                    ♡ Add to Watchlist
+                </button>
+                <button class="auth-btn secondary" onclick="window.location.href='view-podcasts.html'">
+                    📚 View My Watchlist
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden YouTube iframe for audio streaming -->
+    <div class="hidden-video">
+        <div id="player"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentPodcast = null;
+        let player = null;
+        let isPlaying = false;
+        let duration = 0;
+        let progressInterval = null;
+
+        // Load YouTube IFrame API
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '1',
+                width: '1',
+                playerVars: {
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'autoplay': 0,
+                    'iv_load_policy': 3
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            console.log('YouTube player ready');
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                duration = player.getDuration();
+                document.getElementById('duration').textContent = formatTime(duration);
+                document.getElementById('visualizer').classList.remove('paused');
+                document.getElementById('playBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                document.getElementById('status').textContent = 'Now playing...';
+                document.getElementById('status').classList.add('playing');
+                startProgressUpdate();
+                
+                // Add to history when playing
+                addToHistory();
+                
+                // Check saved position
+                checkSavedPosition();
+            } else if (event.data == YT.PlayerState.PAUSED) {
+                isPlaying = false;
+                document.getElementById('visualizer').classList.add('paused');
+                document.getElementById('playBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                document.getElementById('status').textContent = 'Paused';
+                stopProgressUpdate();
+                
+                // Save position when paused
+                savePlaybackPosition();
+            } else if (event.data == YT.PlayerState.ENDED) {
+                isPlaying = false;
+                document.getElementById('visualizer').classList.add('paused');
+                document.getElementById('playBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                document.getElementById('status').textContent = 'Finished playing';
+                stopProgressUpdate();
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('currentTime').textContent = '0:00';
+                
+                // Save final position
+                savePlaybackPosition();
+            }
+        }
+
+        function startProgressUpdate() {
+            stopProgressUpdate();
+            progressInterval = setInterval(() => {
+                if (player && isPlaying) {
+                    const current = player.getCurrentTime();
+                    const percent = (current / duration) * 100;
+                    document.getElementById('progressFill').style.width = percent + '%';
+                    document.getElementById('currentTime').textContent = formatTime(current);
+                    animateVisualizer();
+                }
+            }, 100);
+        }
+
+        function stopProgressUpdate() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+
+        function animateVisualizer() {
+            const bars = document.querySelectorAll('.visualizer .bar');
+            bars.forEach(bar => {
+                const height = Math.random() * 30 + 10;
+                bar.style.height = height + 'px';
+            });
+        }
+
+        function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        async function loadPodcast() {
+            const podcastId = document.getElementById('podcastId').value.trim();
+            if (!podcastId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/podcasts/${podcastId}`);
+                const data = await response.json();
+
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'Failed to load podcast');
+                }
+
+                currentPodcast = data.data;
+
+                document.getElementById('title').textContent = currentPodcast.display_title || currentPodcast.title;
+                document.getElementById('uploader').textContent = currentPodcast.uploader;
+                
+                // Set thumbnail
+                const thumbnailUrl = `https://img.youtube.com/vi/${podcastId}/maxresdefault.jpg`;
+                document.getElementById('thumbnail').src = thumbnailUrl;
+                
+                // Reset progress
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('currentTime').textContent = '0:00';
+                document.getElementById('duration').textContent = currentPodcast.duration || '0:00';
+                
+                document.getElementById('status').textContent = 'Ready to play!';
+                document.getElementById('status').classList.remove('playing');
+                document.getElementById('visualizer').classList.add('paused');
+                document.getElementById('playBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+
+                // Check watchlist status
+                if (user || localStorage.getItem('authToken')) {
+                    checkWatchlistStatus();
+                }
+
+                // Check if should auto-play (from URL parameter)
+                const urlParams = new URLSearchParams(window.location.search);
+                const autoplay = urlParams.get('autoplay');
+                
+                // Stop any currently playing video and start new one
+                if (player && player.loadVideoById) {
+                    if (autoplay === 'true' || autoplay === '1') {
+                        // Auto-play
+                        player.loadVideoById(currentPodcast.id);
+                    } else {
+                        player.stopVideo();
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error loading podcast:', error);
+            }
+        }
+
+        function togglePlay() {
+            if (!currentPodcast) {
+                alert('Please load a podcast first');
+                return;
+            }
+
+            if (player && player.loadVideoById) {
+                if (isPlaying) {
+                    player.pauseVideo();
+                } else {
+                    player.loadVideoById(currentPodcast.id);
+                }
+            }
+        }
+
+        function seek(event) {
+            if (!player || !isPlaying) return;
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            const seekTime = percent * duration;
+            player.seekTo(seekTime, true);
+        }
+
+        function rewind() {
+            if (player && isPlaying) {
+                player.seekTo(player.getCurrentTime() - 10, true);
+            }
+        }
+
+        function openInNewTab() {
+            if (currentPodcast && currentPodcast.youtube_url) {
+                window.open(currentPodcast.youtube_url, '_blank');
+            }
+        }
+
+        // Load sample podcast on page load
+        window.onload = async function() {
+            // Check for podcast ID in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const podcastId = urlParams.get('id');
+            if (podcastId) {
+                document.getElementById('podcastId').value = podcastId;
+                await loadPodcast();
+            } else {
+                setTimeout(loadPodcast, 1000);
+            }
+            
+            // Check auth status
+            await checkAuthStatus();
+        };
+        
+        // ============================================
+        // 🔐 FIREBASE AUTH INTEGRATION
+        // ============================================
+        
+        let auth = null;
+        let user = null;
+        let isInWatchlist = false;
+        
+        // Firebase config - should match auth.html
+        const firebaseConfig = {
+            apiKey: "AIzaSyDBQosoOgqEa0LONZhEZUSVJjV1diFMdCk",
+            authDomain: "ethio-podcast-8a2f0.firebaseapp.com",
+            projectId: "ethio-podcast-8a2f0",
+            storageBucket: "ethio-podcast-8a2f0.firebasestorage.app",
+            messagingSenderId: "976795435136",
+            appId: "1:976795435136:web:fa34145b172223cdad6665"
+        };
+        
+        // Initialize Firebase
+        async function initFirebase() {
+            if (auth) return;
+            
+            try {
+                const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+                const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+                
+                // Check if config is valid
+                if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+                    console.log('⚠️ Firebase not configured. Auth features disabled.');
+                    return;
+                }
+                
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                
+                onAuthStateChanged(auth, (firebaseUser) => {
+                    user = firebaseUser;
+                    updateAuthUI();
+                });
+            } catch (e) {
+                console.error('Firebase init error:', e);
+            }
+        }
+        
+        // Check if user is logged in
+        async function checkAuthStatus() {
+            await initFirebase();
+            
+            // Check for stored token
+            const token = localStorage.getItem('authToken');
+            if (token && !auth) {
+                // Firebase not loaded yet, will check on auth state change
+            }
+        }
+        
+        // Update UI based on auth status
+        function updateAuthUI() {
+            const userInfoEl = document.getElementById('user-info');
+            const authButtonsEl = document.getElementById('auth-buttons');
+            const watchlistSection = document.getElementById('watchlist-section');
+            
+            if (user) {
+                // User is logged in
+                userInfoEl.classList.add('active');
+                authButtonsEl.style.display = 'none';
+                watchlistSection.style.display = 'block';
+                
+                document.getElementById('user-photo').src = user.photoURL || 'https://via.placeholder.com/35';
+                document.getElementById('user-name').textContent = user.displayName || user.email || 'User';
+                
+                // Check if current podcast is in watchlist
+                if (currentPodcast) {
+                    checkWatchlistStatus();
+                }
+            } else {
+                // User is logged out
+                userInfoEl.classList.remove('active');
+                authButtonsEl.style.display = 'block';
+                watchlistSection.style.display = 'none';
+            }
+        }
+        
+        // Sign out
+        async function signOut() {
+            if (!auth) return;
+            
+            const { signOut } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+            await signOut(auth);
+            localStorage.removeItem('authToken');
+            updateAuthUI();
+        }
+        
+        // Get auth header
+        function getAuthHeader() {
+            const token = localStorage.getItem('authToken');
+            return token ? { 'Authorization': `Bearer ${token}` } : {};
+        }
+        
+        // Check if podcast is in watchlist
+        async function checkWatchlistStatus() {
+            if (!currentPodcast) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/user/watchlist`, {
+                    headers: getAuthHeader()
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const watchlist = data.data?.watchlist || [];
+                    isInWatchlist = watchlist.some(item => item.id === currentPodcast.id);
+                    updateWatchlistButton();
+                }
+            } catch (e) {
+                console.error('Error checking watchlist:', e);
+            }
+        }
+        
+        // Update watchlist button appearance
+        function updateWatchlistButton() {
+            const btn = document.getElementById('watchlist-btn');
+            if (isInWatchlist) {
+                btn.innerHTML = '♥ Saved to Watchlist';
+                btn.classList.add('saved');
+            } else {
+                btn.innerHTML = '♡ Add to Watchlist';
+                btn.classList.remove('saved');
+            }
+        }
+        
+        // Toggle watchlist
+        async function toggleWatchlist() {
+            if (!user && !localStorage.getItem('authToken')) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            if (!currentPodcast) {
+                alert('Please load a podcast first');
+                return;
+            }
+            
+            const method = isInWatchlist ? 'DELETE' : 'POST';
+            const url = isInWatchlist 
+                ? `${API_BASE}/user/watchlist/${currentPodcast.id}`
+                : `${API_BASE}/user/watchlist`;
+            
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeader()
+                    },
+                    body: JSON.stringify({
+                        podcastId: currentPodcast.id,
+                        podcastData: {
+                            title: currentPodcast.display_title,
+                            uploader: currentPodcast.uploader,
+                            thumbnail: currentPodcast.thumbnail
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    isInWatchlist = !isInWatchlist;
+                    updateWatchlistButton();
+                } else if (response.status === 401) {
+                    // Token expired, redirect to login
+                    window.location.href = 'auth.html';
+                }
+            } catch (e) {
+                console.error('Error updating watchlist:', e);
+            }
+        }
+        
+        // Save playback position
+        async function savePlaybackPosition() {
+            if (!currentPodcast || !player || !isPlaying) return;
+            
+            const position = player.getCurrentTime();
+            
+            try {
+                await fetch(`${API_BASE}/user/position/${currentPodcast.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeader()
+                    },
+                    body: JSON.stringify({ position })
+                });
+            } catch (e) {
+                console.error('Error saving position:', e);
+            }
+        }
+        
+        // Add to history when playing
+        async function addToHistory() {
+            if (!currentPodcast || !user) return;
+            
+            try {
+                await fetch(`${API_BASE}/user/history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeader()
+                    },
+                    body: JSON.stringify({
+                        podcastId: currentPodcast.id,
+                        podcastData: {
+                            title: currentPodcast.display_title,
+                            uploader: currentPodcast.uploader,
+                            thumbnail: currentPodcast.thumbnail
+                        },
+                        position: player?.getCurrentTime() || 0
+                    })
+                });
+            } catch (e) {
+                console.error('Error adding to history:', e);
+            }
+        }
+        
+        // Check saved position and resume
+        async function checkSavedPosition() {
+            if (!currentPodcast || !player) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/user/position/${currentPodcast.id}`, {
+                    headers: getAuthHeader()
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const position = data.data?.position || 0;
+                    if (position > 10 && position < (duration - 30)) {
+                        // Resume from saved position (if more than 10s in, and not near end)
+                        const resume = confirm(`Continue from ${formatTime(position)}?`);
+                        if (resume) {
+                            player.seekTo(position, true);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error checking saved position:', e);
+            }
+        }
+        
+        // Save position before unload
+        window.addEventListener('beforeunload', () => {
+            if (currentPodcast && player) {
+                savePlaybackPosition();
+            }
+        });
+    </script>
+</body>
+</html>
