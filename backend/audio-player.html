@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>🎧 Offline Audio Player</title>
+    <title>Offline Audio Player</title>
     <style>
         * {
             margin: 0;
@@ -317,22 +317,22 @@
             </button>
         </div>
         
-        <div class="status" id="status">🎧 Ready - Enter Podcast ID</div>
+        <div class="status" id="status">Ready - Enter Podcast ID</div>
         
         <div class="input-section">
             <input type="text" id="podcastId" placeholder="Enter YouTube Video ID" value="32gjWXaXTzs">
             <div class="btn-row">
-                <button onclick="loadPodcast()">▶ Load & Play</button>
-                <button class="secondary" onclick="cachePodcast()">💾 Cache</button>
+                <button onclick="loadPodcast()">Load & Play</button>
+                <button class="secondary" onclick="cachePodcast()">Cache</button>
             </div>
             <div class="btn-row" style="margin-top: 10px;">
-                <button class="secondary" onclick="cachePopular()">📥 Cache 20 Popular</button>
-                <button class="secondary" onclick="checkCacheStatus()">📊 Cache Status</button>
+                <button class="secondary" onclick="cachePopular()">Cache 20 Popular</button>
+                <button class="secondary" onclick="checkCacheStatus()">Cache Status</button>
             </div>
         </div>
         
-        <p class="screen-off-hint">🎯 Audio plays with screen off - wake lock is auto-enabled!</p>
-        <button class="wake-lock-btn active" id="wakeLockBtn" onclick="toggleWakeLock()">☀️ Screen Will Stay On</button>
+        <p class="screen-off-hint">Audio plays with screen off - wake lock is auto-enabled!</p>
+        <button class="wake-lock-btn active" id="wakeLockBtn" onclick="toggleWakeLock()">Screen Will Stay On</button>
     </div>
 
     <!-- Hidden YouTube player for YouTube source -->
@@ -500,13 +500,13 @@
             updatePlayState(false);
             document.getElementById('progressFill').style.width = '0%';
             document.getElementById('currentTime').textContent = '0:00';
-            document.getElementById('status').textContent = '✅ Finished playing';
+            document.getElementById('status').textContent = 'Finished playing';
             document.getElementById('albumArt').classList.add('paused');
         });
 
         audio.addEventListener('error', (e) => {
             console.error('Audio error:', e);
-            showStatus('❌ Error loading audio: ' + (audio.error?.message || 'Unknown'), 'error');
+            showStatus(' Error loading audio: ' + (audio.error?.message || 'Unknown'), 'error');
         });
 
         function updatePlayState(playing) {
@@ -517,12 +517,12 @@
             if (playing) {
                 playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
                 albumArt.classList.remove('paused');
-                document.getElementById('status').textContent = '🎵 Playing...';
+                document.getElementById('status').textContent = ' Playing...';
                 document.getElementById('status').className = 'status streaming';
             } else {
                 playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
                 albumArt.classList.add('paused');
-                document.getElementById('status').textContent = '⏸ Paused';
+                document.getElementById('status').textContent = ' Paused';
             }
         }
 
@@ -544,7 +544,7 @@
                 // Audio source
                 if (audio.paused) {
                     audio.play().catch(e => {
-                        showStatus('❌ Play failed: ' + e.message, 'error');
+                        showStatus(' Play failed: ' + e.message, 'error');
                     });
                 } else {
                     audio.pause();
@@ -657,7 +657,7 @@
                         ytPlayer.loadVideoById(videoId);
                     }
                     
-                    showStatus('📺 YouTube Player - Keep screen on for playback', 'youtube');
+                    showStatus(' YouTube Player - Keep screen on for playback', 'youtube');
                     
                     // Start progress tracking
                     setTimeout(() => {
@@ -673,14 +673,14 @@
                     audio.style.display = 'block';
                     document.getElementById('youtubeContainer').style.display = 'none';
                     
-                    showStatus('📺 YouTube Audio - Works with screen off!', 'streaming');
+                    showStatus(' YouTube Audio - Works with screen off!', 'streaming');
                     
                     // Auto-play
                     audio.play().then(() => {
                         updatePlayState(true);
                     }).catch(e => {
                         console.log('Auto-play prevented:', e.message);
-                        showStatus('❌ Play failed: ' + e.message, 'error');
+                        showStatus(' Play failed: ' + e.message, 'error');
                     });
                     
                 } else if (currentPodcast.cached || currentPodcast.pyrogram) {
@@ -692,9 +692,9 @@
                     
                     // Show source status
                     if (currentPodcast.cached) {
-                        showStatus(`✅ CACHED (${currentPodcast.size}) - Works offline!`, 'cached');
+                        showStatus(` CACHED (${currentPodcast.size}) - Works offline!`, 'cached');
                     } else {
-                        showStatus('🔥 Pyrogram streaming - Screen off works!', 'streaming');
+                        showStatus(' Pyrogram streaming - Screen off works!', 'streaming');
                     }
                     
                     // Auto-play
@@ -712,12 +712,12 @@
                     audio.play().then(() => {
                         updatePlayState(true);
                     }).catch(e => {
-                        showStatus('❌ Cannot play this source', 'error');
+                        showStatus(' Cannot play this source', 'error');
                     });
                 }
 
             } catch(e) {
-                showStatus('❌ Error: ' + e.message, 'error');
+                showStatus(' Error: ' + e.message, 'error');
             }
         }
 
@@ -732,12 +732,12 @@
                 const data = await res.json();
                 
                 if (data.status === 'success') {
-                    showStatus(`✅ Cached: ${data.data.size}`, 'cached');
+                    showStatus(` Cached: ${data.data.size}`, 'cached');
                 } else {
-                    showStatus('❌ ' + data.message, 'error');
+                    showStatus(' ' + data.message, 'error');
                 }
             } catch(e) {
-                showStatus('❌ Cache error: ' + e.message, 'error');
+                showStatus(' Cache error: ' + e.message, 'error');
             }
         }
 
@@ -748,9 +748,9 @@
                 const res = await fetch(`${API}/cache-popular`);
                 const data = await res.json();
                 
-                showStatus(`✅ Cached ${data.cached} of ${data.total} popular!`, 'cached');
+                showStatus(` Cached ${data.cached} of ${data.total} popular!`, 'cached');
             } catch(e) {
-                showStatus('❌ Error: ' + e.message, 'error');
+                showStatus(' Error: ' + e.message, 'error');
             }
         }
 
@@ -760,10 +760,10 @@
                 const data = await res.json();
                 
                 if (data.status === 'success') {
-                    showStatus(`💾 ${data.data.total_files} cached (${data.data.total_size_mb} MB)`, 'cached');
+                    showStatus(` ${data.data.total_files} cached (${data.data.total_size_mb} MB)`, 'cached');
                 }
             } catch(e) {
-                showStatus('❌ Error: ' + e.message, 'error');
+                showStatus(' Error: ' + e.message, 'error');
             }
         }
 
@@ -788,7 +788,7 @@
                 navigator.wakeLock.request('screen').then(wakeLock => {
                     wakeLockEnabled = true;
                     document.getElementById('wakeLockBtn').classList.add('active');
-                    document.getElementById('wakeLockBtn').textContent = '☀️ Screen Will Stay On';
+                    document.getElementById('wakeLockBtn').textContent = ' Screen Will Stay On';
                 }).catch(e => {
                     console.log('Initial wake lock failed:', e);
                 });
@@ -810,7 +810,7 @@
                 }
                 wakeLockEnabled = false;
                 btn.classList.remove('active');
-                btn.textContent = '🌙 Keep Screen Off';
+                btn.textContent = ' Keep Screen Off';
             } else {
                 // Request wake lock
                 try {
@@ -818,12 +818,12 @@
                         wakeLock = await navigator.wakeLock.request('screen');
                         wakeLockEnabled = true;
                         btn.classList.add('active');
-                        btn.textContent = '☀️ Screen Will Stay On';
+                        btn.textContent = ' Screen Will Stay On';
                         
                         wakeLock.addEventListener('release', () => {
                             wakeLockEnabled = false;
                             btn.classList.remove('active');
-                            btn.textContent = '🌙 Keep Screen Off';
+                            btn.textContent = ' Keep Screen Off';
                         });
                     } else {
                         alert('Wake Lock not supported on this device');
@@ -842,7 +842,7 @@
                     wakeLock = await navigator.wakeLock.request('screen');
                     wakeLockEnabled = true;
                     document.getElementById('wakeLockBtn').classList.add('active');
-                    document.getElementById('wakeLockBtn').textContent = '☀️ Screen Will Stay On';
+                    document.getElementById('wakeLockBtn').textContent = ' Screen Will Stay On';
                 } catch(e) {
                     console.log('Auto wake lock failed:', e);
                 }

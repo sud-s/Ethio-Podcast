@@ -18,7 +18,7 @@ const PODCASTS_FILE = path.join(__dirname, 'podcasts.json');
 const CACHE_DIR = path.join(__dirname, 'audio_cache');
 if (!fs.existsSync(CACHE_DIR)) {
     fs.mkdirSync(CACHE_DIR);
-    console.log(`✅ Created cache directory: ${CACHE_DIR}`);
+    console.log(`Created cache directory: ${CACHE_DIR}`);
 }
 
 const WATCHLIST = [
@@ -199,7 +199,7 @@ app.get('/api/player/:id', async (req,res) => {
         // PRIORITY 1: Check local cache
         const cacheFile = path.join(CACHE_DIR, `${d.id}.ogg`);
         if (fs.existsSync(cacheFile) && fs.statSync(cacheFile).size > 100000) {
-            console.log(`✅ CACHE HIT: ${d.id}`);
+            console.log(`CACHE HIT: ${d.id}`);
             return res.json(success({ 
                 id: d.id, 
                 title: d.display_title || d.title || '', 
@@ -273,7 +273,7 @@ app.get('/api/cache-popular', async (req,res) => {
                     if (response.ok) {
                         const buffer = await response.arrayBuffer();
                         fs.writeFileSync(cacheFile, Buffer.from(buffer));
-                        console.log(`✅ CACHED: ${podcast.id}`);
+                        console.log(`CACHED: ${podcast.id}`);
                         cached++;
                     } else {
                         failed++;
@@ -282,7 +282,7 @@ app.get('/api/cache-popular', async (req,res) => {
                     failed++;
                 }
             } catch(e) {
-                console.log(`❌ Cache failed: ${podcast.id} - ${e.message}`);
+                console.log(`Cache failed: ${podcast.id} - ${e.message}`);
                 failed++;
             }
         }
@@ -358,7 +358,7 @@ app.get('/api/youtube-audio/:id', (req, res) => {
     const videoId = req.params.id;
     const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
     
-    console.log(`🎵 Streaming YouTube audio: ${videoId}`);
+    console.log(`Streaming YouTube audio: ${videoId}`);
     
     // Use yt-dlp to stream audio directly - use best audio available
     const ytDlp = spawn('yt-dlp', [
@@ -527,9 +527,9 @@ app.use((req,res) => res.status(404).json({status:'error',message:'Not found'}))
 app.use((e,req,res,next) => res.status(500).json({status:'error',message:e.message}));
 
 app.listen(port, () => { 
-    console.log(`\n🎧 Ethiopodcasts API v2 (JSON) running at http://localhost:${port}`);
-    console.log(`📁 Reading podcasts from: ${PODCASTS_FILE}`);
-    console.log(`💾 Cache directory: ${CACHE_DIR}\n`);
+    console.log(`\nEthiopodcasts API v2 (JSON) running at http://localhost:${port}`);
+    console.log(`Reading podcasts from: ${PODCASTS_FILE}`);
+    console.log(`Cache directory: ${CACHE_DIR}\n`);
     console.log('Endpoints:');
     console.log('  GET /api/health');
     console.log('  GET /api/watchlist');

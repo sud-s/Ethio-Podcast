@@ -252,12 +252,12 @@
                     <img class="podcast-thumbnail" src="${thumbnail}" alt="${podcast.display_title || podcast.title}" onerror="this.src='https://img.youtube.com/vi/${podcast.id}/mqdefault.jpg'">
                     <div class="podcast-info">
                         <div class="podcast-title">${podcast.display_title || podcast.title}</div>
-                        <div class="podcast-uploader">📺 ${podcast.uploader}</div>
+                        <div class="podcast-uploader"> ${podcast.uploader}</div>
                         <div class="podcast-category">🏷️ ${podcast.category}</div>
                         <div class="podcast-uploader">📅 ${dateLabel}</div>
                     </div>
                     <button class="play-btn" onclick="openPlayer('${podcast.id}')">
-                        <span class="play-icon">▶</span> Play Podcast
+                        <span class="play-icon"></span> Play Podcast
                     </button>
                 </div>`;
             });
