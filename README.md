@@ -1,3 +1,25 @@
+# Ethiopodcasts Backend API (Fork)
+
+## About This Fork
+This repository is a fork of sud-s/Ethio-Podcast.
+
+### Purpose of This Fork
+This fork extends the original project with user management features, including:
+
+- User authentication (login, registration, password reset)
+- User profile management
+- Personalization and user settings
+- Security and API design improvements
+
+The original project focuses on podcast scraping and public API services.
+This fork is intended for learning, experimentation, and feature enhancement and does not replace the original project.
+
+### Key Enhancements
+- Integrated Firebase Authentication
+- Implemented password recovery and reset workflows
+- Added foundation for user profiles and preferences
+
+-----------------------------------------------------
 # Ethiopodcasts Backend API v2.0 (JSON)
 
 A professional podcast platform backend focused on Ethiopian audio content. Designed for background listening with lock screen support.
